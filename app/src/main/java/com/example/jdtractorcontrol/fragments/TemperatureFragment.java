@@ -2,6 +2,8 @@ package com.example.jdtractorcontrol.fragments;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -9,6 +11,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.jdtractorcontrol.R;
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -21,6 +26,7 @@ public class TemperatureFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    public GraphView temperatureGraph;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -62,5 +68,23 @@ public class TemperatureFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_temperature, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        temperatureGraph = (GraphView) view.findViewById(R.id.TemperatureGraph);
+        LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>(new DataPoint[]{
+                new DataPoint(0,1),
+                new DataPoint(1,5),
+                new DataPoint(2, 3),
+                new DataPoint(3, 2),
+                new DataPoint(4, 4),
+                new DataPoint(5, 0),
+        });
+        temperatureGraph.addSeries(series);
+        temperatureGraph.getViewport().setScrollable(true);
+        //temperatureGraph.
     }
 }

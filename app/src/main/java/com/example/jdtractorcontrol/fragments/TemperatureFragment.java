@@ -1,19 +1,27 @@
 package com.example.jdtractorcontrol.fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.TextView;
 
+import com.example.jdtractorcontrol.MainActivity;
 import com.example.jdtractorcontrol.R;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
+
+import java.io.IOException;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -21,12 +29,16 @@ import com.jjoe64.graphview.series.LineGraphSeries;
  * create an instance of this fragment.
  */
 public class TemperatureFragment extends Fragment {
-
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     public GraphView temperatureGraph;
+    public TextView currentTemperatureTv;
+    public TextView desiredTemperatureTv;
+    public ImageButton temperatureSPUp;
+    public ImageButton temperatureSPDown;
+    public int currentTemperature;
+    public int desiredTemperature;
+    private Context context;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -74,7 +86,32 @@ public class TemperatureFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        /* ==================== VIEW RRFERENCING ==================== */
         temperatureGraph = (GraphView) view.findViewById(R.id.TemperatureGraph);
+        currentTemperatureTv = view.findViewById(R.id.CurrentTemperatureTv);
+        desiredTemperatureTv = view.findViewById(R.id.DesiredTemperatureTv);
+        temperatureSPUp = view.findViewById(R.id.TemperatureSPUp);
+        temperatureSPDown = view.findViewById(R.id.TemperatureSPDown);
+
+
+        context = getContext();
+        MainActivity mainActivity = ((MainActivity) context);
+
+
+        if(mainActivity.connected && mainActivity.btInputStream != null){
+            try {
+                byte b[] = new byte[1];
+                //Log.e("Buffer read: ", String.valueOf(mainActivity.btInputStream.read()));
+                mainActivity.btInputStream.read(b);
+                currentTemperature = b[0];
+                currentTemperatureTv.setText(String.valueOf(currentTemperature));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }else{
+            currentTemperatureTv.setText("...");
+        }
+
         LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>(new DataPoint[]{
                 new DataPoint(0,1),
                 new DataPoint(1,5),

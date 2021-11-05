@@ -23,6 +23,7 @@ import com.example.jdtractorcontrol.fragments.TemperatureFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     private BluetoothDevice btDevice;
     public BluetoothSocket btConnectionSocket;
     public OutputStream btOutputStream;
+    public InputStream btInputStream;
     public boolean connected = false;
 
     @Override
@@ -119,6 +121,7 @@ public class MainActivity extends AppCompatActivity {
                 btConnectionSocket.connect();
                 Toast.makeText(context, device.getName() + " connected!", Toast.LENGTH_SHORT).show();
                 btOutputStream = btConnectionSocket.getOutputStream();
+                btInputStream = btConnectionSocket.getInputStream();
                 btDevice = device;
                 connected = true;
 

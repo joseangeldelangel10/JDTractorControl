@@ -8,47 +8,52 @@
 
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/currentTemperatureText"
         android:layout_width="140dp"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_marginStart="30dp"
         android:layout_marginTop="30dp"
-        android:text="Current Temperature"
-        android:textAlignment="center" />
+        android:text="Current \n Temperature"
+        android:textAlignment="center"
+        android:textColor="@color/black" />
 
     <TextView
-        android:id="@+id/textView3"
+        android:id="@+id/desiredTemperatureText"
         android:layout_width="140dp"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_marginTop="30dp"
         android:layout_marginEnd="10dp"
         android:layout_toStartOf="@+id/TemperatureSPUp"
-        android:text="Desired Temperature"
+        android:text="Desired \n Temperature"
+        android:textAlignment="center"
+        android:textColor="@color/black"
         android:textSize="14sp" />
 
     <TextView
         android:id="@+id/CurrentTemperatureTv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/textView2"
-        android:layout_alignStart="@+id/textView2"
+        android:layout_below="@+id/currentTemperatureText"
+        android:layout_alignStart="@+id/currentTemperatureText"
         android:layout_marginStart="20dp"
         android:layout_marginTop="20dp"
         android:text="25°C"
+        android:textColor="@color/black"
         android:textSize="48sp" />
 
     <TextView
         android:id="@+id/DesiredTemperatureTv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/textView3"
-        android:layout_alignEnd="@+id/textView3"
+        android:layout_below="@+id/desiredTemperatureText"
+        android:layout_alignEnd="@+id/desiredTemperatureText"
         android:layout_marginTop="20dp"
         android:layout_marginEnd="20dp"
         android:text="26°C"
+        android:textColor="@color/black"
         android:textSize="48sp" />
 
     <ImageButton
@@ -77,6 +82,15 @@
         android:layout_height="300dp"
         android:layout_below="@id/DesiredTemperatureTv"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="50dp"></com.jjoe64.graphview.GraphView>
+        android:layout_marginTop="70dp"></com.jjoe64.graphview.GraphView>
+
+    <Button
+        android:id="@+id/changeSPButt"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/TemperatureGraph"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp"
+        android:text="Change Set point" />
 
 </RelativeLayout>

@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private UUID mDeviceUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); //esp2 32 serial port service UUID
     private BluetoothAdapter bluetoothAdapter;
     private static final int BT_ENABLE_REQUEST = 10; // This is the code we use for BT Enable
-    private BluetoothDevice btDevice;
+    public BluetoothDevice btDevice;
     public BluetoothSocket btConnectionSocket;
     public OutputStream btOutputStream;
     public InputStream btInputStream;
@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         pairedBtDevices = new ArrayList<>();
         context = this;
         fragmentManager = getSupportFragmentManager();
@@ -100,6 +101,9 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
+
+
     public ArrayList<BluetoothDevice> getBtDevices(){
         if (bluetoothAdapter == null) {
             Toast.makeText(context, "Bluetooth not found", Toast.LENGTH_SHORT).show();
@@ -111,6 +115,9 @@ public class MainActivity extends AppCompatActivity {
         }
         return pairedBtDevices;
     }
+
+
+
 
     public boolean connectWith(BluetoothDevice device){
         if(device != null){
@@ -140,8 +147,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Searches for paired devices. Doesn't do a scan! Only devices which are paired through Settings->Bluetooth
-     * will show up with this. I didn't see any need to re-build the wheel over here
-     * @author ryder
+     * will show up with this.
      *
      */
     public class getJDPairedDevices extends AsyncTask<Void, Void, List<BluetoothDevice>> {

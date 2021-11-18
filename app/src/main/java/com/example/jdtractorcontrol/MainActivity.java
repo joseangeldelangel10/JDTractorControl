@@ -132,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
                 btDevice = device;
                 connected = true;
 
-                btOutputStream.write(0);
+                btOutputStream.write(241);
                 return true;
             } catch (IOException e) {
                 e.printStackTrace();

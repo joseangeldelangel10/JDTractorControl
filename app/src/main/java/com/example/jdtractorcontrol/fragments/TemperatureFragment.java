@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +21,7 @@ import android.widget.TextView;
 
 import com.example.jdtractorcontrol.MainActivity;
 import com.example.jdtractorcontrol.R;
+import com.example.jdtractorcontrol.helperClasses.unsignedInt;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
@@ -43,6 +45,7 @@ public class TemperatureFragment extends Fragment {
     public ImageButton temperatureSPUp;
     public ImageButton temperatureSPDown;
     public Button changeSPButton;
+    private boolean initializing = false;
     private boolean changeSP = false;
     public int currentTemperature;
     public int desiredTemperature;
@@ -98,6 +101,10 @@ public class TemperatureFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         temperatureSeriesArray = new ArrayList<>();
         changeSP = false;
+        //initializing = true;
+        context = getContext();
+        mainActivity = ((MainActivity) context);
+        //requestInitialTempValues();
         desiredTemperature = 20;
 
         /* ===========================================================
@@ -114,9 +121,6 @@ public class TemperatureFragment extends Fragment {
         /* =========================================================== */
         setColors2NoSPChange();
         updateDesiredTemperature();
-
-        context = getContext();
-        mainActivity = ((MainActivity) context);
 
 
         temperatureSeries = generateInitialSeries();
@@ -143,6 +147,7 @@ public class TemperatureFragment extends Fragment {
                     changeSPButton.setText("Enter");
                     try {
                         mainActivity.btOutputStream.write(255);
+                        sendRealTimeSP();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -166,11 +171,6 @@ public class TemperatureFragment extends Fragment {
                 if(changeSP) {
                     desiredTemperature++;
                     updateDesiredTemperature();
-                    try {
-                        mainActivity.btOutputStream.write(desiredTemperature);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
                 }
             }
         });
@@ -181,11 +181,6 @@ public class TemperatureFragment extends Fragment {
                 if(changeSP){
                     desiredTemperature--;
                     updateDesiredTemperature();
-                    try {
-                        mainActivity.btOutputStream.write(desiredTemperature);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
                 }
             }
         });
@@ -249,6 +244,69 @@ public class TemperatureFragment extends Fragment {
         temperatureSeriesArray.add(newCoordinate);
     }
 
+    public void requestInitialTempValues(){
+
+        Handler handler = new Handler(Looper.getMainLooper());
+
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    unsignedInt response0;
+                    unsignedInt response1;
+                    unsignedInt response2;
+                    byte b[] = new byte[8];
+                    mainActivity.btInputStream.read(b);
+                    response0 = new unsignedInt(b[0]);
+                    response1 = new unsignedInt(b[1]);
+                    response2 = new unsignedInt(b[2]);
+
+                    String readMsg = new String(b, 0, 7);
+
+                    Log.e("Message is >> ", readMsg);
+
+
+
+                    Log.e("BT RESPONSE >>", "[" + response0.toString() + "  " + response1.toString() + "  " + response2.toString() );
+                    if(!response0.isEqualTo(251)) {
+                        mainActivity.btOutputStream.write(250);
+                        handler.postDelayed(this::run, 1000);
+                    }
+                    else{
+                        desiredTemperature = b[1];
+                        initializing = false;
+                        updateDesiredTemperature();
+                        //getRealTimeTemp();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        handler.postDelayed(runnable, 0);
+    }
+
+    public void sendRealTimeSP(){
+        Handler handler = new Handler(Looper.getMainLooper());
+
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                if(mainActivity.connected && mainActivity.btInputStream != null && mainActivity.bottomMenu.getSelectedItemId() == R.id.temperatureMenu && changeSP) {
+                    try {
+                        mainActivity.btOutputStream.write(desiredTemperature);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    handler.postDelayed(this::run, 1000);
+                }else {
+                    getRealTimeTemp();
+                }
+            }
+        };
+        handler.postDelayed(runnable, 1000);
+    }
+
 
     public void getRealTimeTemp(){
         Handler handler = new Handler(Looper.getMainLooper());
@@ -258,14 +316,19 @@ public class TemperatureFragment extends Fragment {
 
             @Override
             public void run() {
-                if(mainActivity.connected && mainActivity.btInputStream != null && mainActivity.bottomMenu.getSelectedItemId() == R.id.temperatureMenu ){
+                if(mainActivity.connected && mainActivity.btInputStream != null && mainActivity.bottomMenu.getSelectedItemId() == R.id.temperatureMenu && !changeSP && !initializing){
                     try {
-                        byte b[] = new byte[1];
-                        //Log.e("Buffer read: ", String.valueOf(mainActivity.btInputStream.read()));
-                        mainActivity.btInputStream.read(b);
+                        int bufferLenght;
+                        byte b[] = new byte[8];
+                        bufferLenght = mainActivity.btInputStream.read(b,0,7);
                         newTemperature = b[0];
                         mainActivity.btOutputStream.write(240);
-                        if(newTemperature != currentTemperature) {
+
+                        Log.e("BUFFER LENGHT IS >>", String.valueOf(bufferLenght));
+                        String readMsg = new String(b, 0, bufferLenght);
+                        Log.e("Message is >> ", readMsg);
+
+                        if(newTemperature != currentTemperature || currentTemperatureTv.getText().equals("...") ) {
                             currentTemperature = newTemperature;
                             currentTemperatureTv.setText(String.valueOf(currentTemperature));
                         }

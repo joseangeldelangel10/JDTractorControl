@@ -43,6 +43,8 @@ public class TemperatureFragment extends Fragment {
     public ImageButton temperatureSPUp;
     public ImageButton temperatureSPDown;
     public Button changeSPButton;
+
+    private ArrayList<Integer> btInterruptionsQueue = new ArrayList<>();
     private boolean initializing = false;
     private boolean changeSP = false;
     public int currentTemperature;
@@ -106,7 +108,6 @@ public class TemperatureFragment extends Fragment {
         //initializing = true;
         context = getContext();
         mainActivity = ((MainActivity) context);
-        //requestInitialTempValues();
         desiredTemperature = 20;
 
         /* ===========================================================
@@ -147,21 +148,12 @@ public class TemperatureFragment extends Fragment {
                     changeSP = true;
                     setColorsSPChange();
                     changeSPButton.setText("Enter");
-                    try {
-                        mainActivity.btOutputStream.write(255);
-                        sendRealTimeSP();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    btInterruptionsQueue.add(255);
                 }else {
                     changeSP = false;
                     setColors2NoSPChange();
                     changeSPButton.setText("change set point");
-                    try {
-                        mainActivity.btOutputStream.write(255);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    btInterruptionsQueue.add(255);
                 }
             }
         });
@@ -288,7 +280,7 @@ public class TemperatureFragment extends Fragment {
         handler.postDelayed(runnable, 0);
     }
 
-    public void sendRealTimeSP(){
+    /*public void sendRealTimeSP(){
         Handler handler = new Handler(Looper.getMainLooper());
 
         Runnable runnable = new Runnable() {
@@ -307,7 +299,7 @@ public class TemperatureFragment extends Fragment {
             }
         };
         handler.postDelayed(runnable, 2000);
-    }
+    }*/
 
 
     public void getRealTimeTemp(){
@@ -318,23 +310,35 @@ public class TemperatureFragment extends Fragment {
 
             @Override
             public void run() {
-                if(mainActivity.connected && mainActivity.btInputStream != null && mainActivity.bottomMenu.getSelectedItemId() == R.id.temperatureMenu && !changeSP && !initializing){
+                if(mainActivity.connected && mainActivity.btInputStream != null && mainActivity.bottomMenu.getSelectedItemId() == R.id.temperatureMenu){
                     try {
                         int bufferLenght;
                         byte b[] = new byte[8];
                         bufferLenght = mainActivity.btInputStream.read(b);
-                        newTemperature = b[0];
-                        mainActivity.btOutputStream.write(240);
-                        Log.e("BUFFER LENGHT IS >>", String.valueOf(bufferLenght));
-                        String readMsg = new String(b, 0, bufferLenght);
-                        Log.e("Message is >> ", readMsg);
+
+                        if(b[0] >= 240 && b[0] <=255){
+                            newTemperature = currentTemperature;
+                        }else {
+                            newTemperature = b[0];
+                        }
+
+                        if(btInterruptionsQueue.size() >0){
+                            mainActivity.btOutputStream.write(btInterruptionsQueue.get(0));
+                            btInterruptionsQueue.remove(0);
+                        }else if(changeSP){
+                            mainActivity.btOutputStream.write(desiredTemperature);
+                        }else {
+                            mainActivity.btOutputStream.write(240);
+                        }
+                        //Log.e("BUFFER LENGHT IS >>", String.valueOf(bufferLenght));
+                        //String readMsg = new String(b, 0, bufferLenght);
+                        //Log.e("Message is >> ", readMsg);
 
                         if(newTemperature != currentTemperature || currentTemperatureTv.getText().equals("...") ) {
                             currentTemperature = newTemperature;
                             currentTemperatureTv.setText(String.valueOf(currentTemperature));
                         }
                         push2TempArray(newTemperature);
-                        //Log.e("bt temp thread >>", temperatureSeriesArray.toString());
                         temperatureSeries.resetData(generateNewDataPoints());
                     } catch (IOException e) {
                         e.printStackTrace();

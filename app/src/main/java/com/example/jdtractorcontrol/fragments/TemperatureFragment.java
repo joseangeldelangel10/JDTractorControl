@@ -35,8 +35,6 @@ import java.util.ArrayList;
  * create an instance of this fragment.
  */
 public class TemperatureFragment extends Fragment {
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
     public TextView currentTemperatureText;
     public TextView desiredTemperatureText;
     public GraphView temperatureGraph;
@@ -53,6 +51,10 @@ public class TemperatureFragment extends Fragment {
     private MainActivity mainActivity;
     private LineGraphSeries<DataPoint> temperatureSeries;
     private ArrayList<ArrayList<Integer>> temperatureSeriesArray;
+
+
+    private static final String ARG_PARAM1 = "param1";
+    private static final String ARG_PARAM2 = "param2";
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -298,13 +300,13 @@ public class TemperatureFragment extends Fragment {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    handler.postDelayed(this::run, 1000);
+                    handler.postDelayed(this::run, 2000);
                 }else {
                     getRealTimeTemp();
                 }
             }
         };
-        handler.postDelayed(runnable, 1000);
+        handler.postDelayed(runnable, 2000);
     }
 
 
@@ -320,10 +322,9 @@ public class TemperatureFragment extends Fragment {
                     try {
                         int bufferLenght;
                         byte b[] = new byte[8];
-                        bufferLenght = mainActivity.btInputStream.read(b,0,7);
+                        bufferLenght = mainActivity.btInputStream.read(b);
                         newTemperature = b[0];
                         mainActivity.btOutputStream.write(240);
-
                         Log.e("BUFFER LENGHT IS >>", String.valueOf(bufferLenght));
                         String readMsg = new String(b, 0, bufferLenght);
                         Log.e("Message is >> ", readMsg);
@@ -338,13 +339,13 @@ public class TemperatureFragment extends Fragment {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    handler.postDelayed(this::run, 1000);
+                    handler.postDelayed(this::run, 2000);
                 }else{
                     currentTemperatureTv.setText("...");
                 }
             }
         };
-        handler.postDelayed(runnable, 1000);
+        handler.postDelayed(runnable, 2000);
     }
 
 }

@@ -1,7 +1,7 @@
 package com.example.jdtractorcontrol.helperClasses;
 
 public class unsignedInt {
-    int value;
+    public int value;
 
     public unsignedInt(byte number){
         this.value =  number & 0xff;

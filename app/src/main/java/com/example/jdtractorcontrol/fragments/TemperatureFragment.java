@@ -47,6 +47,7 @@ public class TemperatureFragment extends Fragment {
     private ArrayList<Integer> btInterruptionsQueue = new ArrayList<>();
     private boolean initializing = false;
     private boolean changeSP = false;
+    private boolean setPointResponseEnabled = false;
     public int currentTemperature;
     public int desiredTemperature;
     private Context context;
@@ -105,10 +106,12 @@ public class TemperatureFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         temperatureSeriesArray = new ArrayList<>();
         changeSP = false;
-        //initializing = true;
+        initializing = false;
+        setPointResponseEnabled = false;
         context = getContext();
         mainActivity = ((MainActivity) context);
         desiredTemperature = 20;
+        //btInterruptionsQueue.add(250);
 
         /* ===========================================================
         *                       VIEW RRFERENCING
@@ -280,34 +283,13 @@ public class TemperatureFragment extends Fragment {
         handler.postDelayed(runnable, 0);
     }
 
-    /*public void sendRealTimeSP(){
-        Handler handler = new Handler(Looper.getMainLooper());
-
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                if(mainActivity.connected && mainActivity.btInputStream != null && mainActivity.bottomMenu.getSelectedItemId() == R.id.temperatureMenu && changeSP) {
-                    try {
-                        mainActivity.btOutputStream.write(desiredTemperature);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    handler.postDelayed(this::run, 2000);
-                }else {
-                    getRealTimeTemp();
-                }
-            }
-        };
-        handler.postDelayed(runnable, 2000);
-    }*/
-
 
     public void getRealTimeTemp(){
         Handler handler = new Handler(Looper.getMainLooper());
 
         Runnable runnable = new Runnable() {
             int newTemperature;
-
+            unsignedInt lecture;
             @Override
             public void run() {
                 if(mainActivity.connected && mainActivity.btInputStream != null && mainActivity.bottomMenu.getSelectedItemId() == R.id.temperatureMenu){
@@ -315,11 +297,19 @@ public class TemperatureFragment extends Fragment {
                         int bufferLenght;
                         byte b[] = new byte[8];
                         bufferLenght = mainActivity.btInputStream.read(b);
+                        lecture = new unsignedInt(b[0]);
 
-                        if(b[0] >= 240 && b[0] <=255){
+                        if(lecture.value >= 240 && lecture.value <=255){
+                            if(lecture.value == 251 && initializing){
+                                setPointResponseEnabled = true;
+                            }
                             newTemperature = currentTemperature;
+                        }else if(setPointResponseEnabled){
+                            desiredTemperature = lecture.value;
+                            setPointResponseEnabled = false;
+                            initializing = false;
                         }else {
-                            newTemperature = b[0];
+                            newTemperature = lecture.value;
                         }
 
                         if(btInterruptionsQueue.size() >0){

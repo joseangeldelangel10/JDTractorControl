@@ -106,12 +106,12 @@ public class TemperatureFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         temperatureSeriesArray = new ArrayList<>();
         changeSP = false;
-        initializing = false;
+        initializing = true;
         setPointResponseEnabled = false;
         context = getContext();
         mainActivity = ((MainActivity) context);
         desiredTemperature = 20;
-        //btInterruptionsQueue.add(250);
+        btInterruptionsQueue.add(250);
 
         /* ===========================================================
         *                       VIEW RRFERENCING
@@ -126,7 +126,7 @@ public class TemperatureFragment extends Fragment {
         changeSPButton = view.findViewById(R.id.changeSPButt);
         /* =========================================================== */
         setColors2NoSPChange();
-        updateDesiredTemperature();
+        desiredTemperatureTv.setText("...");
 
 
         temperatureSeries = generateInitialSeries();
@@ -308,6 +308,9 @@ public class TemperatureFragment extends Fragment {
                             desiredTemperature = lecture.value;
                             setPointResponseEnabled = false;
                             initializing = false;
+                            btInterruptionsQueue.add(250);
+                            updateDesiredTemperature();
+                            newTemperature = currentTemperature;
                         }else {
                             newTemperature = lecture.value;
                         }

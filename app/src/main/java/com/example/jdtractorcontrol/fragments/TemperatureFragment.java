@@ -241,48 +241,6 @@ public class TemperatureFragment extends Fragment {
         temperatureSeriesArray.add(newCoordinate);
     }
 
-    public void requestInitialTempValues(){
-
-        Handler handler = new Handler(Looper.getMainLooper());
-
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    unsignedInt response0;
-                    unsignedInt response1;
-                    unsignedInt response2;
-                    byte b[] = new byte[8];
-                    mainActivity.btInputStream.read(b);
-                    response0 = new unsignedInt(b[0]);
-                    response1 = new unsignedInt(b[1]);
-                    response2 = new unsignedInt(b[2]);
-
-                    String readMsg = new String(b, 0, 7);
-
-                    Log.e("Message is >> ", readMsg);
-
-
-
-                    Log.e("BT RESPONSE >>", "[" + response0.toString() + "  " + response1.toString() + "  " + response2.toString() );
-                    if(!response0.isEqualTo(251)) {
-                        mainActivity.btOutputStream.write(250);
-                        handler.postDelayed(this::run, 1000);
-                    }
-                    else{
-                        desiredTemperature = b[1];
-                        initializing = false;
-                        updateDesiredTemperature();
-                        //getRealTimeTemp();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-        handler.postDelayed(runnable, 0);
-    }
-
 
     public void getRealTimeTemp(){
         Handler handler = new Handler(Looper.getMainLooper());
